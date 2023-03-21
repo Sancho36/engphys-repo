@@ -1,0 +1,141 @@
+#include <Servo.h>
+Servo leftservo;  
+Servo rightservo;  
+const int pingPin = 5; // Trigger Pin of Ultrasonic Sensor
+const int echoPin = 6; // Echo Pin of Ultrasonic Sensor
+float distance;
+long duration;
+bool wall_a;
+bool wall_b;
+
+bool inRange(int val, int minimum, int maximum)
+{
+  return ((minimum <= val) && (val < maximum));
+}
+
+void take_dist() {
+  //clear the ping pin
+  digitalWrite(pingPin, LOW);
+  delayMicroseconds(2);
+  //send the 10 microsecond trigger
+  digitalWrite(pingPin, HIGH);
+  delayMicroseconds(10);
+  digitalWrite(pingPin, LOW);
+  //get the pulse duration in microseconds
+  duration = pulseIn(echoPin, HIGH);
+  //calculate the distance
+  distance = duration*0.034/2;
+  Serial.print("Distance = ");
+  Serial.print(distance);
+  Serial.println(" cm");
+}
+
+void turn_right() {
+  leftservo.write(180);
+  rightservo.write(110);
+}
+
+void turn_left() {
+  leftservo.write(70);
+  rightservo.write(0);
+}
+
+void forward() {
+  leftservo.write(170);
+  rightservo.write(10);
+}
+
+void backward() {
+  leftservo.write(10);
+  rightservo.write(170);
+}
+
+void stop() {
+  leftservo.write(90);
+  rightservo.write(90);
+}
+
+//Main program:
+
+void setup() {
+  leftservo.attach(9);  
+  rightservo.attach(10);
+  //set up the Serial
+  Serial.begin(9600);
+  //setupt the pin modes  
+  pinMode(pingPin, OUTPUT);
+  pinMode(echoPin, INPUT);
+  leftservo.write(90);
+  rightservo.write(90);
+  wall_a = true;
+  wall_b = false;
+}
+
+void loop() {
+
+take_dist();
+
+if((distance < 100)&&(wall_a == true)){
+  turn_right();
+  delay(800);
+  turn_left();
+  delay(800);
+}
+
+else if((inRange(distance, 100, 110))&&(wall_a == true)){
+  forward();
+  delay(500);
+}
+
+else if((inRange(distance, 110, 300))&&(wall_a == true)){
+  turn_left();
+  delay(800);
+  turn_right();
+  delay(800);
+}
+
+if(distance >= 300){
+
+  while(true){
+    
+    leftservo.write(180);
+    rightservo.write(180);
+    delay(1500);
+    take_dist();
+  
+    if(distance > 80){
+      leftservo.write(0);
+      rightservo.write(0);
+      delay(1500);
+      forward();
+      delay(800);
+    }
+
+    else if(distance <= 80){
+      wall_a = false;
+      wall_b = true;
+      break;
+    }
+  }
+}
+
+if((distance < 70)&&(wall_b == true)){
+  turn_right();
+  delay(800);
+  turn_left();
+  delay(800);
+}
+
+else if((inRange(distance, 70, 90))&&(wall_b == true)){
+  forward();
+  delay(500);
+}
+
+else if((inRange(distance, 90, 300))&&(wall_b == true)){
+  turn_left();
+  delay(800);
+  turn_right();
+  delay(800);
+}
+
+}
