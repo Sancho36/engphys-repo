@@ -1,0 +1,94 @@
+#include <Servo.h>
+Servo leftservo;  
+Servo rightservo;  
+const int pingPin = 5; // Trigger Pin of Ultrasonic Sensor
+const int echoPin = 6; // Echo Pin of Ultrasonic Sensor
+float distance;
+long duration;
+
+void take_dist() {
+  //clear the ping pin
+  digitalWrite(pingPin, LOW);
+  delayMicroseconds(2);
+  //send the 10 microsecond trigger
+  digitalWrite(pingPin, HIGH);
+  delayMicroseconds(10);
+  digitalWrite(pingPin, LOW);
+  //get the pulse duration in microseconds
+  duration = pulseIn(echoPin, HIGH);
+  //calculate the distance
+  distance = duration*0.034/2;
+  Serial.print("Distance = ");
+  Serial.print(distance);
+  Serial.println(" cm");
+}
+
+//Main program:
+
+void setup() {
+  leftservo.attach(9);  
+  rightservo.attach(10);
+   //set up the Serial
+  Serial.begin(9600);
+  //set up the pin modes  
+  pinMode(pingPin, OUTPUT);
+  pinMode(echoPin, INPUT);
+  leftservo.write(90);
+  rightservo.write(90);
+}
+
+void loop() {
+
+take_dist();
+
+if (distance == 110) { 
+  rightservo.write(0);
+  leftservo.write(180);
+  //1st wall: go straight
+}
+
+else if (distance == 70) {
+  rightservo.write(0);
+  leftservo.write(180);
+  //2nd wall: go straight
+}
+
+else if (distance < 70) {
+  rightservo.write(30);
+  leftservo.write(180);
+  //turn right
+}
+
+else if (distance < 110) {
+  rightservo.write(10);
+  leftservo.write(180);
+  //turn right
+}
+
+else if (distance > 130) {
+  rightservo.write(65);
+  leftservo.write(180);
+  //gap with no wall: execute right turn
+}
+
+else if (distance > 110) {
+  rightservo.write(0);
+  leftservo.write(160);
+  //turn left
+}
+
+delay(50); //refresh rate is set to 50 ms
+
+/*
+In this challenge, sequence of events is as follows:
+- First, distance < 110; = robot slowly turns right
+- Then, distance becomes > 110; = robot turns left
+- After, distance reaches < 110 again; = robot slowly turns right
+- Gap then appears and distance > 130; = robot does right hand turn
+- 2nd wall is then registered by the sensor and distance > 110; = robot turns left
+- Distance then becomes < 110; = robot turns right very slowly
+- After, distance gets even lower and reaches < 70; = robot turns right a bit more
+- Finally, distance becomes > 110; = robot turns left right before collecting the final coin
+*/
+
+}
