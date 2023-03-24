@@ -1,0 +1,149 @@
+#include <Servo.h>
+Servo leftservo;  
+Servo rightservo;  
+const int pingPin = 5; // Trigger Pin of Ultrasonic Sensor
+const int echoPin = 6; // Echo Pin of Ultrasonic Sensor
+float distance;
+long duration;
+bool wall_a; //variable to represent the upper wall
+bool wall_b; //variable to represent the wall on the right
+
+bool inRange(int val, int minimum, int maximum)
+{
+  return ((minimum <= val) && (val < maximum));
+}
+/*function which enables us to set a range of values, 
+makes it so that we don't have to use && all the time*/
+
+void take_dist() { //we can call this function whenever we want to take the distance from the wall
+  //clear the ping pin
+  digitalWrite(pingPin, LOW);
+  delayMicroseconds(2);
+  //send the 10 microsecond trigger
+  digitalWrite(pingPin, HIGH);
+  delayMicroseconds(10);
+  digitalWrite(pingPin, LOW);
+  //get the pulse duration in microseconds
+  duration = pulseIn(echoPin, HIGH);
+  //calculate the distance
+  distance = duration*0.034/2;
+  Serial.print("Distance = ");
+  Serial.print(distance);
+  Serial.println(" cm");
+  //print the distance
+}
+
+void turn_right() { //we can call this function to make the robot turn right
+  leftservo.write(180);
+  rightservo.write(70);
+}
+
+void turn_left() { //we can call this function to make the robot turn left
+  leftservo.write(110);
+  rightservo.write(0);
+}
+
+void forward() { //we can call this function to make the robot go forward
+  leftservo.write(170);
+  rightservo.write(10);
+}
+
+void backward() { //we can call this function to make the robot go backward
+  leftservo.write(10);
+  rightservo.write(170);
+}
+
+void stop() { //we can call this function to make the robot stop
+  leftservo.write(90);
+  rightservo.write(90);
+}
+
+//Main program:
+
+void setup() {
+  leftservo.attach(9);  
+  rightservo.attach(10);
+  //set up the Serial
+  Serial.begin(9600);
+  //setup the pin modes  
+  pinMode(pingPin, OUTPUT);
+  pinMode(echoPin, INPUT);
+  leftservo.write(90);
+  rightservo.write(90);
+  wall_a = true;
+  wall_b = false;
+  //this indicates that the robot is initially following the top wall
+}
+
+void loop() {
+
+take_dist(); //measure the distance between the robot and the wall
+
+if((distance < 30)&&(wall_a == true)){
+  turn_right();
+  delay(400);
+}
+//if the distance is under 100 for the top wall, then the robot has a net movement to the right
+
+else if((inRange(distance, 30, 50))&&(wall_a == true)){
+  forward();
+  delay(500);
+}
+//if the distance is between 100 and 110 for the top wall, then the robot goes forward
+
+else if((inRange(distance, 50, 180))&&(wall_a == true)){
+  turn_left();
+  delay(400);
+}
+//if the distance is between 110 and 300 for the top wall, then the robot has net movement to the left
+
+if(distance >= 300){
+
+  while(true){ //when the robot reaches the gap, we enter a while loop
+    leftservo.write(180);
+    rightservo.write(180);
+    delay(1500);
+    take_dist();
+    /*the robot adjusts its position and turns right, 
+    this is so that it can take the distance from the wall on the right of the screen*/
+  
+    if(distance > 80){
+      leftservo.write(0);
+      rightservo.write(0);
+      delay(1500);
+      forward();
+      delay(800);
+    }
+    /*if the robot is further than 80 cm from the right wall,
+    then the cart turns left, goes forward a little, and the while loop continues*/
+
+    else if(distance <= 80){
+      wall_a = false;
+      wall_b = true;
+      break;
+    /*if the robot is closer than 80 cm from the wall right, the while loop breaks,
+    wall_a becomes false and wall_b becomes true which tells the robot that it is now following the wall on the right*/
+    }
+  }
+}
+
+if((distance < 70)&&(wall_b == true)){ //if the distance is under 70 for the right wall, then the robot has a net movement to the right
+  turn_right();
+  delay(800);
+  turn_left();
+  delay(800);
+}
+
+else if((inRange(distance, 70, 90))&&(wall_b == true)){ //if the distance is between 70 and 90 for the right wall, then the robot goes forward
+  forward();
+  delay(500);
+}
+
+else if((inRange(distance, 90, 300))&&(wall_b == true)){ //if the distance is between 90 and 300 for the right wall, then the robot has a net movement to the left
+  turn_left();
+  delay(800);
+  turn_right();
+  delay(800);
+}
+
+}
