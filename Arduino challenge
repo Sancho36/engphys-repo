@@ -35,7 +35,7 @@ void take_dist() { //we can call this function whenever we want to take the dist
 
 void turn_right() { //we can call this function to make the robot turn right
   leftservo.write(180);
-  rightservo.write(70);
+  rightservo.write(60);
 }
 
 void turn_left() { //we can call this function to make the robot turn left
@@ -83,67 +83,42 @@ if((distance < 30)&&(wall_a == true)){
   turn_right();
   delay(400);
 }
-//if the distance is under 100 for the top wall, then the robot has a net movement to the right
+//if the distance is under 30 for the top wall, then the robot has a net movement to the right
 
 else if((inRange(distance, 30, 50))&&(wall_a == true)){
   forward();
   delay(500);
 }
-//if the distance is between 100 and 110 for the top wall, then the robot goes forward
+//if the distance is between 30 and 50 for the top wall, then the robot goes forward
 
-else if((inRange(distance, 50, 180))&&(wall_a == true)){
+else if((inRange(distance, 50, 100))&&(wall_a == true)){
   turn_left();
   delay(400);
 }
-//if the distance is between 110 and 300 for the top wall, then the robot has net movement to the left
+//if the distance is between 50 and 180 for the top wall, then the robot has net movement to the left
 
-if(distance >= 300){
+if(distance >= 100){
 
   while(true){ //when the robot reaches the gap, we enter a while loop
+    forward();
+    delay(2000);
     leftservo.write(180);
-    rightservo.write(180);
-    delay(1500);
+    rightservo.write(90);
+    delay(400);
     take_dist();
     /*the robot adjusts its position and turns right, 
     this is so that it can take the distance from the wall on the right of the screen*/
-  
-    if(distance > 80){
-      leftservo.write(0);
-      rightservo.write(0);
-      delay(1500);
-      forward();
-      delay(800);
-    }
-    /*if the robot is further than 80 cm from the right wall,
-    then the cart turns left, goes forward a little, and the while loop continues*/
 
-    else if(distance <= 80){
+    if(distance == 0){
+      continue;
+    }
+
+    if(distance <= 50){
       wall_a = false;
       wall_b = true;
       break;
-    /*if the robot is closer than 80 cm from the wall right, the while loop breaks,
-    wall_a becomes false and wall_b becomes true which tells the robot that it is now following the wall on the right*/
     }
   }
-}
-
-if((distance < 70)&&(wall_b == true)){ //if the distance is under 70 for the right wall, then the robot has a net movement to the right
-  turn_right();
-  delay(800);
-  turn_left();
-  delay(800);
-}
-
-else if((inRange(distance, 70, 90))&&(wall_b == true)){ //if the distance is between 70 and 90 for the right wall, then the robot goes forward
-  forward();
-  delay(500);
-}
-
-else if((inRange(distance, 90, 300))&&(wall_b == true)){ //if the distance is between 90 and 300 for the right wall, then the robot has a net movement to the left
-  turn_left();
-  delay(800);
-  turn_right();
-  delay(800);
 }
 
 }
