@@ -116,9 +116,9 @@ if((distance >= 100)&&(wall_a == true)){
     }
 
     if(distance <= 100){
-      break;
       wall_a = false;
       wall_b = true;
+      break;
     }
   }
 }
@@ -158,9 +158,9 @@ if((distance >= 100)&&(wall_b == true)){
     }
 
     if(distance <= 100){
-      break;
       wall_b = false;
       wall_c = true;
+      break;
     }
   }
 }
