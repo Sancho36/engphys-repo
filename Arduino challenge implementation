@@ -7,12 +7,12 @@ float distance;
 long duration;
 int turn;
 
+/*function which enables us to set a range of values, 
+makes it so that we don't have to use && all the time*/
 bool inRange(int val, int minimum, int maximum)
 {
   return ((minimum <= val) && (val < maximum));
 }
-/*function which enables us to set a range of values, 
-makes it so that we don't have to use && all the time*/
 
 void take_dist() { //we can call this function whenever we want to take the distance from the wall
   //clear the ping pin
@@ -76,35 +76,36 @@ void loop() {
 
 take_dist(); //measure the distance between the robot and the wall
 
+//if the distance is under 30 for wall 1, then the robot has a net movement to the right
 if((distance < 30)&&(turn == 0)){
   turn_right();
   delay(400);
 }
-//if the distance is under 30 for wall A, then the robot has a net movement to the right
 
+//if the distance is between 30 and 50 for wall 1, then the robot goes forward
 else if((inRange(distance, 30, 50))&&(turn == 0)){
   forward();
   delay(500);
 }
-//if the distance is between 30 and 50 for wall A, then the robot goes forward
 
-else if((inRange(distance, 50, 100))&&(turn == 0)){
+//if the distance is between 50 and 150 for wall A, then the robot has net movement to the left
+else if((inRange(distance, 50, 150))&&(turn == 0)){
   turn_left();
   delay(400);
 }
-//if the distance is between 50 and 100 for wall A, then the robot has net movement to the left
 
-if((distance >= 100)&&(turn == 0)){
+//if the distance is above 150 for wall 1, then the robot know it has reached the first turn
+if((distance >= 150)&&(turn == 0)){
 
   while(true){ //when the robot reaches the gap, we enter a while loop
+    /*the robot adjusts its position and turns right, 
+    this is so that it can take the distance from the wall on the right of the screen*/
     forward();
     delay(2000);
     leftservo.write(180);
     rightservo.write(90);
     delay(400);
     take_dist();
-    /*the robot adjusts its position and turns right, 
-    this is so that it can take the distance from the wall on the right of the screen*/
 
     if(distance == 0){
       continue;
@@ -117,35 +118,36 @@ if((distance >= 100)&&(turn == 0)){
   }
 }
 
+//if the distance is under 30 for wall 2, then the robot has a net movement to the right
 if((distance < 30)&&(turn == 1)){
   turn_right();
   delay(400);
 }
-//if the distance is under 30 for wall B, then the robot has a net movement to the right
 
+//if the distance is between 30 and 50 for wall 2, then the robot goes forward
 else if((inRange(distance, 30, 50))&&(turn == 1)){
   forward();
   delay(500);
 }
-//if the distance is between 30 and 50 for wall B, then the robot goes forward
 
+//if the distance is between 50 and 150 for wall 2, then the robot has net movement to the left
 else if((inRange(distance, 50, 150))&&(turn == 1)){
   turn_left();
   delay(400);
 }
-//if the distance is between 50 and 100 for wall B, then the robot has net movement to the left
 
+//if the distance is above and 150 for wall 2, then the robot knows it has reached the second turn
 if((distance >= 150)&&(turn == 1)){
 
   while(true){ //when the robot reaches the gap, we enter a while loop
+    /*the robot adjusts its position and turns left, 
+    this is so that it can take the distance from the wall on the right of the screen*/
     leftservo.write(90);
     rightservo.write(180);
     delay(400);
     forward();
     delay(2000);
     take_dist();
-    /*the robot adjusts its position and turns left, 
-    this is so that it can take the distance from the wall on the right of the screen*/
 
     if(distance == 0){
       continue;
@@ -158,22 +160,22 @@ if((distance >= 150)&&(turn == 1)){
   }
 }
 
+//if the distance is under 30 for wall 3, then the robot has a net movement to the right
 if((distance < 30)&&(turn == 2)){
   turn_right();
   delay(400);
 }
-//if the distance is under 30 for wall C, then the robot has a net movement to the right
 
+//if the distance is between 30 and 50 for wall 3, then the robot goes forward
 else if((inRange(distance, 30, 50))&&(turn == 2)){
   forward();
   delay(500);
 }
-//if the distance is between 30 and 50 for wall C, then the robot goes forward
 
-else if((inRange(distance, 50, 100))&&(turn == 2)){
+//if the distance is between 50 and 150 for wall 3, then the robot has net movement to the left
+else if((inRange(distance, 50, 150))&&(turn == 2)){
   turn_left();
   delay(400);
 }
-//if the distance is between 50 and 100 for wall C, then the robot has net movement to the left
 
 }
