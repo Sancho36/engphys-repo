@@ -5,9 +5,7 @@ const int pingPin = 5; // Trigger Pin of Ultrasonic Sensor
 const int echoPin = 6; // Echo Pin of Ultrasonic Sensor
 float distance;
 long duration;
-bool wall_a; //variable to represent wall A
-bool wall_b; //variable to represent wall B
-bool wall_c; //variable to represent wall C
+int turn;
 
 bool inRange(int val, int minimum, int maximum)
 {
@@ -71,35 +69,32 @@ void setup() {
   pinMode(echoPin, INPUT);
   leftservo.write(90);
   rightservo.write(90);
-  wall_a = true;
-  wall_b = false;
-  wall_c = false;
-  //this indicates that the robot is initially following wall A
+  turn = 0;
 }
 
 void loop() {
 
 take_dist(); //measure the distance between the robot and the wall
 
-if((distance < 30)&&(wall_a == true)){
+if((distance < 30)&&(turn == 0)){
   turn_right();
   delay(400);
 }
 //if the distance is under 30 for wall A, then the robot has a net movement to the right
 
-else if((inRange(distance, 30, 50))&&(wall_a == true)){
+else if((inRange(distance, 30, 50))&&(turn == 0)){
   forward();
   delay(500);
 }
 //if the distance is between 30 and 50 for wall A, then the robot goes forward
 
-else if((inRange(distance, 50, 100))&&(wall_a == true)){
+else if((inRange(distance, 50, 100))&&(turn == 0)){
   turn_left();
   delay(400);
 }
 //if the distance is between 50 and 100 for wall A, then the robot has net movement to the left
 
-if((distance >= 100)&&(wall_a == true)){
+if((distance >= 100)&&(turn == 0)){
 
   while(true){ //when the robot reaches the gap, we enter a while loop
     forward();
@@ -116,32 +111,31 @@ if((distance >= 100)&&(wall_a == true)){
     }
 
     if(distance <= 100){
-      wall_a = false;
-      wall_b = true;
+      turn = 1;
       break;
     }
   }
 }
 
-if((distance < 30)&&(wall_b == true)){
+if((distance < 30)&&(turn == 1)){
   turn_right();
   delay(400);
 }
 //if the distance is under 30 for wall B, then the robot has a net movement to the right
 
-else if((inRange(distance, 30, 50))&&(wall_b == true)){
+else if((inRange(distance, 30, 50))&&(turn == 1)){
   forward();
   delay(500);
 }
 //if the distance is between 30 and 50 for wall B, then the robot goes forward
 
-else if((inRange(distance, 50, 100))&&(wall_b == true)){
+else if((inRange(distance, 50, 150))&&(turn == 1)){
   turn_left();
   delay(400);
 }
 //if the distance is between 50 and 100 for wall B, then the robot has net movement to the left
 
-if((distance >= 100)&&(wall_b == true)){
+if((distance >= 150)&&(turn == 1)){
 
   while(true){ //when the robot reaches the gap, we enter a while loop
     leftservo.write(90);
@@ -158,29 +152,28 @@ if((distance >= 100)&&(wall_b == true)){
     }
 
     if(distance <= 100){
-      wall_b = false;
-      wall_c = true;
+      turn = 2;
       break;
     }
   }
 }
 
-if((distance < 30)&&(wall_c == true)){
+if((distance < 30)&&(turn == 2)){
   turn_right();
   delay(400);
 }
-//if the distance is under 30 for wall B, then the robot has a net movement to the right
+//if the distance is under 30 for wall C, then the robot has a net movement to the right
 
-else if((inRange(distance, 30, 50))&&(wall_c == true)){
+else if((inRange(distance, 30, 50))&&(turn == 2)){
   forward();
   delay(500);
 }
-//if the distance is between 30 and 50 for wall B, then the robot goes forward
+//if the distance is between 30 and 50 for wall C, then the robot goes forward
 
-else if((inRange(distance, 50, 100))&&(wall_c == true)){
+else if((inRange(distance, 50, 100))&&(turn == 2)){
   turn_left();
   delay(400);
 }
-//if the distance is between 50 and 100 for wall B, then the robot has net movement to the left
+//if the distance is between 50 and 100 for wall C, then the robot has net movement to the left
 
 }

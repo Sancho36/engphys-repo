@@ -1,0 +1,201 @@
+#include <Servo.h>
+Servo leftservo;  
+Servo rightservo;  
+const int pingPin = 5; // Trigger Pin of Ultrasonic Sensor
+const int echoPin = 6; // Echo Pin of Ultrasonic Sensor
+float distance;
+long duration;
+bool wall_a;
+bool wall_b;
+long time;
+
+
+bool inRange(int val, int minimum, int maximum)
+{
+  return ((minimum <= val) && (val < maximum));
+}
+
+
+//VARIABLES:
+
+//Robot speed
+float v = 2.778;
+
+//Turn angles
+float sm = 90; // small angle
+float sh = 80; // sharp angle
+
+//Delay times
+float qd = 300; // quick delay
+float ld = 400; // long delay
+
+//Target distances
+float mindist = 30; // minimum distance
+float maxdist = 70; // maximum distance
+float outofbounds = 150; // out of code
+
+//Turn 1 = right; Turn 2 = left
+int turn = 1;
+
+
+//FUNCTIONS:
+
+void take_dist() {
+  //clear the ping pin
+  digitalWrite(pingPin, LOW);
+  delayMicroseconds(2);
+  //send the 10 microsecond trigger
+  digitalWrite(pingPin, HIGH);
+  delayMicroseconds(10);
+  digitalWrite(pingPin, LOW);
+  //get the pulse duration in microseconds
+  duration = pulseIn(echoPin, HIGH);
+  //calculate the distance
+  distance = duration*0.034/2;
+  Serial.print("Distance = ");
+  Serial.print(distance);
+  Serial.println(" cm");
+}
+
+
+void turn_right() {
+  leftservo.write(90+sm);
+  rightservo.write(180);
+  Serial.print("turn_right");
+}
+
+
+void turn_left() {
+  leftservo.write(0);
+  rightservo.write(90-sm);
+  Serial.print("turn_left");
+}
+
+
+void forward() {
+  leftservo.write(170);
+  rightservo.write(10);
+  Serial.print("forward");
+}
+
+
+void backward() {
+  leftservo.write(10);
+  rightservo.write(170);
+  Serial.print("back");
+}
+
+
+void stop() {
+  leftservo.write(90);
+  rightservo.write(90);
+  Serial.print("stop");
+}
+void measure() {
+  Serial.print("measure");
+
+
+    //Sharp right
+    leftservo.write(90+sh);
+    rightservo.write(180);
+    delay(3*qd);
+    
+    take_dist();
+    
+    //Sharp left
+    leftservo.write(0);
+    rightservo.write(90-sh);
+    delay(3*qd);
+    stop();
+}
+
+
+void cal_delay() {
+    time = (distance/2)/v*10;
+    Serial.print("cal");
+}
+
+
+//MAIN PROGRAM:
+
+void setup() {
+    leftservo.attach(9);  
+    rightservo.attach(10);
+    //set up the Serial
+    Serial.begin(9600);
+    //setup the pin modes  
+    pinMode(pingPin, OUTPUT);
+    pinMode(echoPin, INPUT);
+    leftservo.write(90);
+    rightservo.write(90);
+}
+
+void loop() {
+
+take_dist();
+
+//Top wall too close
+if((distance < mindist)){
+    turn_right();
+    delay(ld);
+
+    while((distance < mindist)){
+        take_dist();
+        forward();  
+    }
+
+    turn_left();
+    delay(ld);
+    Serial.print("Top wall too close");
+}
+
+//Top wall distance OK
+else if((inRange(distance, mindist, maxdist))){
+    forward();
+    delay(qd);
+    Serial.print("Top wall OK");
+}
+
+//Top wall too far
+else if((inRange(distance, maxdist, outofbounds))){
+    turn_left();
+    delay(ld);
+
+    while((inRange(distance, maxdist, outofbounds))){
+        take_dist();
+        forward();  
+    }
+
+    turn_right();
+    delay(ld);
+    Serial.print("Top wall too far");
+}
+
+//No wall
+if(distance >= outofbounds){
+switch(turn){
+
+    case 1:
+    Serial.print("TURNING AAA");
+    measure();
+    cal_delay();
+    Serial.print(time);
+    forward();
+    delay(time);
+    Serial.print(time);
+    turn_right();
+    delay(3*qd);
+    take_dist();
+    forward();
+    delay(3*qd);
+    turn = 2;
+    break; 
+
+    case 2:
+    turn_left();
+    delay(3*qd);
+    break;
+    }
+}
+
+}
