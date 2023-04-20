@@ -144,7 +144,7 @@ if((distance >= 150)&&(turn == 1)){
     forward();
     delay(2000);
     take_dist();
-    /*the robot adjusts its position and turns right, 
+    /*the robot adjusts its position and turns left, 
     this is so that it can take the distance from the wall on the right of the screen*/
 
     if(distance == 0){
