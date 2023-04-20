@@ -18,8 +18,8 @@ bool inRange(int val, int minimum, int maximum)
 
 //VARIABLES:
 
-//Robot speed
-float v = 2.778;
+//Robot speed (cm/s)
+float v = 27.78;
 
 //Turn angles
 float sm = 90; // small angle
