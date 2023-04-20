@@ -149,7 +149,7 @@ if((inRange(distance, 150, 500))&&(turn == 1)){
 
   while(true){ //when the robot reaches the gap, we enter a while loop
     leftservo.write(90);
-    rightservo.write(180);
+    rightservo.write(0);
     delay(400);
     forward();
     delay(2000);
