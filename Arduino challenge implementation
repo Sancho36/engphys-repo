@@ -110,7 +110,7 @@ if((distance >= 100)&&(turn == 0)){
       continue;
     }
 
-    if(distance <= 100){
+    else if(distance <= 100){
       turn = 1;
       break;
     }
@@ -151,7 +151,7 @@ if((distance >= 150)&&(turn == 1)){
       continue;
     }
 
-    if(distance <= 100){
+    else if(distance <= 100){
       turn = 2;
       break;
     }
