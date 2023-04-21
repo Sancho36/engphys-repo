@@ -1,7 +1,6 @@
 {
     "files.associations": {
         "Super challenge v1": "cpp",
-        "arduino challenge implementation": "cpp",
         "arduino challenge implementation (with fail safe)": "cpp",
         "arduino challenge (leo's code)": "cpp"
     }

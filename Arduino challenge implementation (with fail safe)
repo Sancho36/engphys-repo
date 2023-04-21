@@ -5,7 +5,7 @@ const int pingPin = 5; // Trigger Pin of Ultrasonic Sensor
 const int echoPin = 6; // Echo Pin of Ultrasonic Sensor
 float distance;
 long duration;
-int turn;
+int turn; //indicates the turn number, helps the robot know where it is
 
 /*function which enables us to set a range of values, 
 makes it so that we don't have to use && all the time*/
@@ -34,17 +34,20 @@ void take_dist() { //we can call this function whenever we want to take the dist
 
 void turn_right() { //we can call this function to make the robot turn right
   leftservo.write(180);
-  rightservo.write(60);
+  rightservo.write(57);
+  Serial.print("-> turning right ");
 }
 
 void turn_left() { //we can call this function to make the robot turn left
   leftservo.write(110);
   rightservo.write(0);
+  Serial.print("-> turning left ");
 }
 
 void forward() { //we can call this function to make the robot go forward
-  leftservo.write(170);
-  rightservo.write(10);
+  leftservo.write(115);
+  rightservo.write(0);
+  Serial.print("-> going forward ");
 }
 
 void backward() { //we can call this function to make the robot go backward
@@ -69,55 +72,70 @@ void setup() {
   pinMode(echoPin, INPUT);
   leftservo.write(90);
   rightservo.write(90);
-  turn = 0;
+  turn = 0; //initially, the robot has completed 0 turns
 }
 
 void loop() {
 
 take_dist(); //measure the distance between the robot and the wall
 
-//if the distance is under 30 for wall 1, then the robot has a net movement to the right
-if((distance < 30)&&(turn == 0)){
+//if the distance is under 49 for wall 1, then the robot has a net movement to the right
+if((inRange(distance, 5, 45))&&(turn == 0)){
   turn_right();
-  delay(400);
-}
-
-//if the distance is between 30 and 50 for wall 1, then the robot goes forward
-else if((inRange(distance, 30, 50))&&(turn == 0)){
-  forward();
-  delay(500);
-}
-
-//if the distance is between 50 and 150 for wall 1, then the robot has net movement to the left
-else if((inRange(distance, 50, 150))&&(turn == 0)){
-  turn_left();
-  delay(400);
-}
-
-//fail-safe wall 1
-else if((distance >= 500)&&(turn == 0)){
-  Serial.println("Enacted fail-safe 1");
-  forward();
   delay(100);
 }
 
-//if the distance is between 150 and 500 for wall 1, then the robot knows it has reached the first turn
-if((inRange(distance, 150, 500))&&(turn == 0)){
+else if((distance < 5)&&(turn == 0)){
+  stop();
+  delay(300);
+}
+
+//if the distance is between 49 and 50 for wall 1, then the robot goes forward
+else if((inRange(distance, 45, 55))&&(turn == 0)){
+  forward();
+  delay(200);
+}
+
+//if the distance is between 50 and 150 for wall 1, then the robot has net movement to the left
+else if((inRange(distance, 55, 150))&&(turn == 0)){
+  turn_left();
+  delay(200);
+}
+
+/*fail-safe wall 1 in case the robot has an issue 
+(usually, when the sensor does not register a distance correctly, it defaults to something close to 1189 cm)*/
+else if((distance >= 400)&&(turn == 0)){
+  Serial.println("Enacted fail-safe 1");
+  forward();
+  delay(200);
+}
+
+//if the distance is between 150 and 400 for wall 1, then the robot knows it has reached the first turn
+if((inRange(distance, 150, 400))&&(turn == 0)){
 
   while(true){ //when the robot reaches the gap, we enter a while loop
     /*the robot adjusts its position and turns right, 
-    this is so that it can take the distance from the wall on the right of the screen*/
+    this is so that it can take the distance from wall 2*/
     forward();
-    delay(2000);
+    delay(2500);
     leftservo.write(180);
     rightservo.write(90);
-    delay(400);
+    delay(500);
     take_dist();
 
+    //fail-safe in case the sensor has an error and registors a distance of 0 cm
     if(distance == 0){
       continue;
     }
-
+    
+    /*fail-safe in case the sensor registers an odd value,
+    we are fairly confident in this part, so if such a case */
+    else if(distance >= 400){
+      turn = 1;
+      Serial.println("Turn 1 completed");
+      break;
+    }
+      
     else if(distance <= 150){
       turn = 1;
       Serial.println("Turn 1 completed");
@@ -127,45 +145,53 @@ if((inRange(distance, 150, 500))&&(turn == 0)){
 }
 
 //if the distance is under 30 for wall 2, then the robot has a net movement to the right
-if((distance < 30)&&(turn == 1)){
+if((distance < 34)&&(turn == 1)){
   turn_right();
-  delay(400);
+  delay(100);
 }
 
 //if the distance is between 30 and 50 for wall 2, then the robot goes forward
-else if((inRange(distance, 30, 50))&&(turn == 1)){
+else if((inRange(distance, 34, 35))&&(turn == 1)){
   forward();
-  delay(500);
+  delay(100);
 }
 
 //if the distance is between 50 and 150 for wall 2, then the robot has net movement to the left
-else if((inRange(distance, 50, 150))&&(turn == 1)){
+else if((inRange(distance, 35, 150))&&(turn == 1)){
   turn_left();
-  delay(400);
+  delay(100);
 }
 
 //fail-safe wall 2
-else if((distance >= 500)&&(turn == 1)){
+else if((distance >= 400)&&(turn == 1)){
   Serial.println("Enacted fail-safe 2");
   forward();
   delay(100);
 }
 
 //if the distance is between 150 and 500 for wall 2, then the robot knows it has reached the second turn
-if((inRange(distance, 150, 500))&&(turn == 1)){
+if((inRange(distance, 60, 400))&&(turn == 1)){
 
   while(true){ //when the robot reaches the gap, we enter a while loop
     /*the robot adjusts its position and turns left, 
     this is so that it can take the distance from the wall on the right of the screen*/
+    forward();
+    delay(600);
     leftservo.write(90);
     rightservo.write(0);
-    delay(400);
+    delay(500);
     forward();
     delay(2000);
     take_dist();
 
     if(distance == 0){
       continue;
+    }
+
+    else if(distance >= 400){
+      turn = 2;
+      Serial.println("Turn 2 completed");
+      break;
     }
 
     else if(distance <= 100){
@@ -177,25 +203,25 @@ if((inRange(distance, 150, 500))&&(turn == 1)){
 }
 
 //if the distance is under 30 for wall 3, then the robot has a net movement to the right
-if((distance < 30)&&(turn == 2)){
+if((distance < 24)&&(turn == 2)){
   turn_right();
-  delay(400);
+  delay(100);
 }
 
 //if the distance is between 30 and 50 for wall 3, then the robot goes forward
-else if((inRange(distance, 30, 50))&&(turn == 2)){
+else if((inRange(distance, 24, 25))&&(turn == 2)){
   forward();
-  delay(500);
+  delay(100);
 }
 
 //if the distance is between 50 and 150 for wall 3, then the robot has net movement to the left
-else if((inRange(distance, 50, 150))&&(turn == 2)){
+else if((inRange(distance, 25, 150))&&(turn == 2)){
   turn_left();
-  delay(400);
+  delay(100);
 }
 
 //fail-safe wall 3
-else if((distance >= 500)&&(turn == 2)){
+else if((distance >= 400)&&(turn == 2)){
   Serial.println("Enacted fail-safe 3");
   forward();
   delay(100);

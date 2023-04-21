@@ -1,0 +1,12 @@
+#include <Servo.h>
+Servo leftservo;  
+Servo rightservo;  
+void setup() {
+  leftservo.attach(9);  
+  rightservo.attach(10); 
+}
+
+void loop() {
+  leftservo.write(170);
+  rightservo.write(10);
+}
